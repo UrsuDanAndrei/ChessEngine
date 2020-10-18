@@ -1,0 +1,86 @@
+@Copyright 2020 - Echipa BUM - Bunea Andrei, Ursu Dan, Mihalcea Adrian (324CA)
+
+Etapa 1
+
+Pentru prima etapa, noi ne-am concentrat pe implementarea comunicarii cu
+xboard. Am creat de asemenea clasele BasicMap si BasicPiece pentru
+a testa aceasta comunicare (si am implementat naiv mutarile pentru
+pion). Pentru urmatoarele etape, vom finaliza clasele MyMap si Piece
+(si subclasele asociate) care acum sunt work-in-progress.
+
+Makefile-ul nostru compileaza programul cu make all si ruleaza engine-ul
+nostru cu make run. Nu am inteles exact cum va fi conectat la xboard
+fara cai absolute.
+
+Protocolul de comunicare cu xboard este aproape complet (luam in calcul
+si modul de analyze/force/edit game, comenzile white, black, go etc).
+
+Pe implementarea curenta a hartii (care este temporara), engine-ul
+inregistreaza mutarile pe harta locala doar atunci cand joaca alb.
+Cand joaca negru, mutarile pionilor sunt hard-codate.
+
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Etapa 2
+
+Instructiuni de compilare:
+    - programul este scris in C++
+    - programul se compileaza cu regula make build (se compileaza sursele cpp cu c++17 (pentru niste lucru cu tupluri))
+    - make run ruleaza executabilul, mai sunt multe reguli specifice setupului membrilor echipei
+
+Structura proiectului:
+    - testEngine.cpp: sursa principala, aici se afla functia main care face parsarea comenzilor de la xboard si apelul tuturor celorlate functii;
+    - piece.cpp: implementarile functiilor din clasa Piece, corespunzand pieselor de joc;
+    - move.cpp: implementarile functiilor din clasa Move, tinand coordonatele unei miscari si pointeri la piesele implicate, avand constructori
+    diferiti in functie de momentul apelarii;
+    - chess_map.cpp: aici se afla clasa care tine harta de joc
+        - representation tine pointeri la obiecte de tip Piece, fiind implementata dupa logica:
+            - coltul din stanga jos al hartii este (1, 1), prima coordonata reprezentand coloana iar a doua linia (ca la o mutare de saj de genul a2a3)
+            - noi consideram mereu ca botul nostru se afla in partea de jos a hartii (este alb), dar tinem minte daca este de fapt negru si
+            simetrizam toate miscarile primite si efectuate 
+        - este implementata cu Singleton, pentru a avea o singura instanta,
+        - implementeaza execute_move, undo_move si flip (flip invarte harta pentru a schimba rolurile celor doi jucatori);
+    - helper.cpp: contine mai multe functii auxiliare folosite pentru a transforma si flipui mutari
+    - move_chooser.cpp: are algoritmi pentru ales miscarea botului
+        - minimax alege recursiv mutarea cea mai dezavantajoasa pentru adversar
+        - choose_move este un wrapper pentru minimax
+        - get_all_valid_moves genereaza toate miscarile valide (fara sa considere sahul) pentru piesa primita ca argument, apeland get_pawn_moves si
+        get_piece_moves
+        - is_checked verifica daca regele alb este in sah dupa efectuarea unei mutari
+
+
+Algoritmi:
+    - minimax
+    - eval evalueaza harta din perspectiva albului, in functie de valorile si pozitiile pieselor
+    - algoritm de verificare sah: verifica daca de la pozitia regelui se poate ajunge la o piesa de tip X printr-o mutare de tip X (implicit si invers)
+    - generat miscari: avand offseturile pentru cele doua coordonate caracteristice pieselor si posibilitatea lor de a se muta mai mult de un patratel,
+    se genereaza toata mutarile posibile (cu cazuri speciale pentru rocada, en passant, promovare de pioni)
+
+Surse de inspiratie:
+    - documentatia c++
+    - stackoverflow
+    - geeksforgeeks
+
+Responsabilitatile membrilor echipei:
+Pe gitlab putem observa etapele progresului nostru (din commituri).
+Dupa etapa 1, avem cateva commituri care au imbunatatit structurile de date si au indreptate bug-urile legate de schimbatul culorii
+oponentului - Adrian a rescris si a completat structurile de date, iar Andrei si Dan au facut debug.
+
+Pentru etapa 2, Andrei a scris functia de evaluare si de undo, Adrian a scris functia de minimax si a imbinat logica celorlalte functii, iar Dan s-a ocupat
+de verificarea pozitiilor valide si a situatiei de sah si promovarea a pieselor. 
+Impreuna, am avut conferinte de peste 20 de ore in total in care ne-am ocupat de debugging si am discutat logica implementarii. Ne-am chinuit mult Impreuna
+cu pointeri, referinte, management al memoriei, corner case-uri, afisari, performanta, deschideri si diverse buguri foarte random.
+
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Etapa 3
+
+In etapa 3, am facut mici optimizari de memorie pentru minimax. Am optimizat putin alpha-beta ul. Am incercat sa crestem adancimea de minimax
+atunci cand miscarea de la adancimea 1 presupune luarea unei piese (pentru a lua in calcul si "schimbul"). Totusi, implementarea noastra ineficienta
+dpdv al memoriei nu ne-a permis sa facem asta.
+
+In acest moment, algoritmul nostru are toata logica de joc implementata corect, rezista de obicei 30+ mutari impotriva fairymaxului,
+dar isi ia bataie de cele mai multe ori.
+
+Pentru etapa 3, Andrei a facut debugging pentru minimax pe diverse adancimi si euristici. Adi a cercetat si incercat modalitati de optimizare
+a minimaxului. Dan s-a jucat cu bonusurile de pozitie si alocari si initializari.

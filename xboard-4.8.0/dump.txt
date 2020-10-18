@@ -1,0 +1,25 @@
+xboard
+protover
+new
+random
+level
+post
+hard
+force
+In functie analyze
+In functie .
+In functie d2d4
+In functie e7e6
+In functie e2e3
+In functie exit
+In functie force
+In functie white
+In functie time 30000
+In functie otim 30000
+In functie black
+In functie go
+cevvvvvvvvvvvvvvvvvvvva
+result 0-1 {White resigns}
+force
+In functie undo
+In functie quit
